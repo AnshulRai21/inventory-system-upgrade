@@ -15,19 +15,21 @@ A shared, cloud-backed inventory register for housekeeping supplies and consumab
 - Four reports with CSV export
 - JSON backup and restore
 
-## Deploy on Railway
+## Deploy on Vercel
 
-1. Create a Railway project and add a PostgreSQL service.
-2. Deploy this repository as a Node service from GitHub.
-3. Add these variables to the app service:
-   - `DATABASE_URL=${{Postgres.DATABASE_URL}}` (replace Postgres with the exact name of your database service if different)
-   - `ADMIN_USERNAME=admin` (or your chosen shared username)
-   - `ADMIN_PASSWORD=<long unique secret>`
-4. Set the app service Pre-deploy Command to `npm run db:migrate`.
-5. Set Build Command to `npm run build` and Start Command to `npm start`.
-6. Generate a public domain in the service Networking settings.
+1. Create a new PostgreSQL database using a Vercel Marketplace provider (for example, Neon). Choose the provider's pooled connection string for application traffic.
+2. Import this GitHub repository into Vercel and select the `railway-migration` branch as the Production Branch for the initial rollout. Keep the existing Netlify deployment separate.
+3. In Vercel Project Settings → Environment Variables, add the following for Production:
+   - `DATABASE_URL`: the pooled PostgreSQL connection string supplied by your database provider.
+   - `ADMIN_USERNAME`: `admin` or your chosen shared username.
+   - `ADMIN_PASSWORD`: a long, unique secret.
+4. Keep the Framework Preset as **TanStack Start**. The repository's `vercel.json` sets this explicitly and runs the idempotent database initialisation before each build.
+5. Deploy the Production Branch. Vercel builds the app, runs `npm run db:migrate`, then builds the TanStack Start application for Vercel through Nitro.
+6. Open the deployed URL and verify the public register, administrator login, item editing, stock movements, reports and backup/restore.
 
-The database setup creates the four inventory tables and indexes, adds the standard 24-item catalogue only when the items table is empty, and initialises the sync version row. It does not read, connect to, or alter the old Netlify database.
+For Preview deployments, either disable them during the initial rollout or configure a separate preview PostgreSQL database and its own `DATABASE_URL`. Do not point an untrusted Preview deployment at the production inventory database.
+
+The database setup creates the four inventory tables and indexes, adds the standard 24-item catalogue only when the items table is empty, and initialises the sync version row. It does not read, connect to, or alter the old Netlify database. The migration script is safe to run again on the same database.
 
 ## Local development
 
@@ -43,7 +45,7 @@ npm run dev
 
 ## Administrator access
 
-Railway uses one shared administrator username/password. Store both as Railway service variables; never commit credentials. Admin sessions use a signed HTTP-only, SameSite=Lax cookie and expire after 12 hours. Changing the password invalidates existing sessions.
+Vercel uses one shared administrator username/password. Store both as Vercel environment variables; never commit credentials. Admin sessions use a signed HTTP-only, SameSite=Lax cookie and expire after 12 hours. Changing the password invalidates existing sessions.
 
 ## Fresh database behaviour
 
