@@ -1,5 +1,4 @@
 import { createMiddleware, createServerFn } from '@tanstack/react-start'
-import { getUser } from '@netlify/identity'
 import { eq } from 'drizzle-orm'
 import { z } from 'zod'
 
@@ -24,17 +23,10 @@ export const getSnapshot = createServerFn({ method: 'GET' }).handler(() => readS
 /** Cheap change check used by the live-sync poller. */
 export const getVersion = createServerFn({ method: 'GET' }).handler(() => readVersion())
 
-export const getSession = createServerFn({ method: 'GET' }).handler(async () => {
+export const getSession = createServerFn({ method: 'GET' }).handler(() => {
   const shared = readSharedSession()
-  if (shared) return { email: shared, name: 'Administrator', isAdmin: true, shared: true }
-  const user = await getUser()
-  if (!user) return null
-  return {
-    email: user.email ?? '',
-    name: user.name ?? '',
-    isAdmin: (user.roles ?? []).includes(ADMIN_ROLE),
-    shared: false,
-  }
+  if (!shared) return null
+  return { email: shared, name: 'Administrator', isAdmin: true, shared: true }
 })
 
 /** Whether the shared username/password login is configured (ADMIN_PASSWORD is set). */
@@ -57,11 +49,8 @@ export const sharedLogout = createServerFn({ method: 'POST' }).handler(() => {
 
 const requireAdmin = createMiddleware({ type: 'function' }).server(async ({ next }) => {
   const shared = readSharedSession()
-  if (shared) return next({ context: { user: { email: shared as string | undefined } } })
-  const user = await getUser()
-  if (!user) throw new Error('Please sign in as an administrator.')
-  if (!(user.roles ?? []).includes(ADMIN_ROLE)) throw new Error('Your account does not have administrator access.')
-  return next({ context: { user: { email: user.email } } })
+  if (!shared) throw new Error('Please sign in as an administrator.')
+  return next({ context: { user: { email: shared } } })
 })
 
 const month = z.string().regex(/^\d{4}-\d{2}$/, 'Month must be YYYY-MM')
