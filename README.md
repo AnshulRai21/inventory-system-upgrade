@@ -1,44 +1,43 @@
 # Housekeeping Digital Inventory Register
 
-A shared, cloud-backed inventory register for housekeeping guest supplies and consumables. It has two access points:
+A shared, cloud-backed inventory register for housekeeping guest supplies and consumables.
 
-- **Public view (`/`)**: anyone with the link can see the register without signing in. It's read-only and updates on its own when stock changes.
-- **Admin panel (`/admin`)**: only signed-in administrators can add or edit items, set opening stock, record receipts and consumption, correct or delete movements, and back up or restore the data.
-
-All data lives in one shared Postgres database, so a change made by an admin on one device shows up for every viewer within a few seconds.
+- **Public view (/):** anyone with the link can view the register without signing in. It is read-only and refreshes automatically when stock changes.
+- **Admin panel (/admin):** one shared administrator username and password can add or edit items, set opening stock, record receipts and consumption, correct or delete movements, and back up or restore data.
+- **Database:** PostgreSQL on Railway, accessed through Drizzle ORM.
 
 ## Features
 
-- Stock register for each month: opening, received, consumption and closing quantities and values (Closing = Opening + Received − Consumption)
-- 24 preloaded items with rates from the September 2026 register
-- Low or zero stock flags, search and filters
-- Summary cards and a six-month summary
-- Movement history for each month
-- Four reports: date range inventory, item-wise, issues by location and date, and new receipts by date. Each can be exported to CSV or printed or saved as PDF
-- CSV export of the register
-- JSON backup and restore. Backups from the original browser-only register are accepted too
+- Monthly opening, received, consumption and closing quantities and values (Closing = Opening + Received - Consumption)
+- 24 preloaded housekeeping items and rates from the September 2026 register
+- Low/zero-stock flags, search and filters
+- Six-month summary and movement history
+- Date-range, item-wise, issue-location and receipt reports
+- CSV exports, print/PDF and JSON backup/restore
+- Public view automatically detects changes made by administrators
 
-## Tech stack
+## Railway deployment
 
-- TanStack Start (React 19, TanStack Router) with Vite, deployed on Netlify
-- Netlify Database (managed Postgres) with Drizzle ORM
-- Netlify Identity for administrator login and roles
-- Tailwind CSS 4 and shadcn/ui components
+1. Create a Railway project and add a PostgreSQL service.
+2. Deploy this GitHub repository as a Node service.
+3. In the app service, set these variables:
+   - `DATABASE_URL`: reference the PostgreSQL service's `DATABASE_URL` variable.
+   - `ADMIN_USERNAME`: the shared admin username (for example, `admin`).
+   - `ADMIN_PASSWORD`: a long, unique password. Keep it secret; never commit it to Git.
+4. Use Node.js 22.13 or newer. The build command is `npm run build`; the start command is `npm start`.
+5. Generate a public domain in the app service's Settings → Networking.
 
-## Setting up administrators
+The start command runs the idempotent fresh-database schema/seed migration before starting the TanStack Start Nitro server. The migration creates the four inventory tables and seeds the 24 standard items only once. It does not import data from the former Netlify database.
 
-1. Deploy the site, then open **Identity** in the Netlify dashboard and click **Invite users**.
-2. The invited person accepts the email invite and sets a password on the site.
-3. In the Identity user list, open that user and add the role `admin`.
-4. Recommended: under **Project configuration › Identity**, set Registration to **Invite only**.
+## Fresh database behaviour
 
-Accounts without the `admin` role can sign in but can't change anything.
+A new Railway PostgreSQL database starts with the 24 standard item definitions and their default rates. It starts with no opening-balance history and no stock movements. Admins should enter the correct opening balances for the first month before recording stock movements.
 
-## Running locally
+## Local development
 
 ```bash
-pnpm install
-netlify dev
+npm install
+npm run dev
 ```
 
-`netlify dev` provides the local database and Identity emulation. Database migrations live in `netlify/database/migrations/` and are applied automatically on deploy. After changing `db/schema.ts`, run `npx drizzle-kit generate --name <change>`.
+Set `DATABASE_URL`, `ADMIN_USERNAME`, and `ADMIN_PASSWORD` in your local environment before using database-backed routes.
