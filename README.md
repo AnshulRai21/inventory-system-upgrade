@@ -18,7 +18,7 @@ A shared, cloud-backed inventory register for housekeeping supplies and consumab
 ## Deploy on Vercel
 
 1. Create a new PostgreSQL database using a Vercel Marketplace provider (for example, Neon). Choose the provider's pooled connection string for application traffic.
-2. Import this GitHub repository into Vercel and select the `railway-migration` branch as the Production Branch for the initial rollout. Keep the existing Netlify deployment separate.
+2. Import this GitHub repository into Vercel and select the `vercel-migration` branch as the Production Branch for the initial rollout. Keep the existing Netlify deployment separate.
 3. In Vercel Project Settings → Environment Variables, add the following for Production:
    - `DATABASE_URL`: the pooled PostgreSQL connection string supplied by your database provider.
    - `ADMIN_USERNAME`: `admin` or your chosen shared username.
