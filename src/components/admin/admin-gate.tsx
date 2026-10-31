@@ -62,7 +62,7 @@ function LoginForm({ onDone }: { onDone: () => Promise<void> }) {
         <Button type="submit" className="w-full">{pending ? <Loader2 className="animate-spin" /> : <KeyRound />}{pending ? 'Signing in…' : 'Sign in'}</Button>
       </fieldset>
       {error && <p role="alert" className="text-center text-sm text-destructive">{error}</p>}
-      <p className="text-center text-xs text-muted-foreground">To reset access, the system owner must update the administrator credentials in Railway service variables.</p>
+      <p className="text-center text-xs text-muted-foreground">To reset access, the system owner must update the administrator credentials in Vercel environment variables.</p>
       <div className="text-center text-sm"><Link to="/" className="font-medium text-primary underline-offset-4 hover:underline">View public register →</Link></div>
     </form>
   </CenteredCard>
