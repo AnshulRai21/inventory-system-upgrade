@@ -23,8 +23,8 @@ A shared, cloud-backed inventory register for housekeeping supplies and consumab
    - `DATABASE_URL`: the pooled PostgreSQL connection string supplied by your database provider.
    - `ADMIN_USERNAME`: `admin` or your chosen shared username.
    - `ADMIN_PASSWORD`: a long, unique secret.
-4. Keep the Framework Preset as **TanStack Start**. The repository's `vercel.json` sets this explicitly and runs the idempotent database initialisation before each build.
-5. Deploy the Production Branch. Vercel builds the app, runs `npm run db:migrate`, then builds the TanStack Start application for Vercel through Nitro.
+4. Keep the Framework Preset as **TanStack Start**. The repository's `vercel.json` explicitly sets the TanStack Start framework preset. Vercel detects the build and output settings through Nitro; leave the Build Command and Output Directory at their detected defaults.
+5. Before deploying, initialise the new database once by running `npm run db:migrate` from the project root with `DATABASE_URL` set to the new database connection string. Do not add the migration command to Vercel's build command: Preview builds should not mutate the production database. Then deploy the Production Branch using Vercel's detected build settings.
 6. Open the deployed URL and verify the public register, administrator login, item editing, stock movements, reports and backup/restore.
 
 For Preview deployments, either disable them during the initial rollout or configure a separate preview PostgreSQL database and its own `DATABASE_URL`. Do not point an untrusted Preview deployment at the production inventory database.
