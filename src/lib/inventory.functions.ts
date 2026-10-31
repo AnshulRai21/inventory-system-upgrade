@@ -11,9 +11,11 @@ export const ADMIN_ROLE = 'admin'
 
 export const getSnapshot = createServerFn({ method: 'GET' }).handler(() => readSnapshot())
 export const getVersion = createServerFn({ method: 'GET' }).handler(() => readVersion())
+
 export const getSession = createServerFn({ method: 'GET' }).handler(() => {
-  const username = readSharedSession()
-  return username ? { email: username, name: 'Administrator', isAdmin: true, shared: true } : null
+  const shared = readSharedSession()
+  if (!shared) return null
+  return { email: shared, name: 'Administrator', isAdmin: true, shared: true }
 })
 export const getLoginOptions = createServerFn({ method: 'GET' }).handler(() => ({ shared: sharedLoginEnabled() }))
 
@@ -31,9 +33,9 @@ export const sharedLogout = createServerFn({ method: 'POST' }).handler(() => {
 })
 
 const requireAdmin = createMiddleware({ type: 'function' }).server(async ({ next }) => {
-  const username = readSharedSession()
-  if (!username) throw new Error('Please sign in as an administrator.')
-  return next({ context: { user: { email: username } } })
+  const shared = readSharedSession()
+  if (!shared) throw new Error('Please sign in as an administrator.')
+  return next({ context: { user: { email: shared } } })
 })
 
 const month = z.string().regex(/^\d{4}-\d{2}$/, 'Month must be YYYY-MM')
