@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Field } from '@/components/register/shell'
 
+export const CALLBACK_KEYS: string[] = []
+
 export type AdminSession = { email: string; name: string; isAdmin: boolean; shared: boolean }
 type GateState = { kind: 'loading' } | { kind: 'signed-out' } | { kind: 'admin'; session: AdminSession }
 
