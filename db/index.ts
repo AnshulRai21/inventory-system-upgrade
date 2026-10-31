@@ -13,5 +13,8 @@ const pool = new Pool({
   idleTimeoutMillis: 5_000,
   connectionTimeoutMillis: 10_000,
 })
+if (!connectionString) throw new Error('DATABASE_URL is not configured.')
+
+const pool = new Pool({ connectionString, max: 10 })
 
 export const db = drizzle(pool, { schema })

@@ -34,6 +34,9 @@ const requireAdmin = createMiddleware({ type: 'function' }).server(async ({ next
   const username = readSharedSession()
   if (!username) throw new Error('Please sign in as an administrator.')
   return next({ context: { user: { email: username } } })
+  const shared = readSharedSession()
+  if (!shared) throw new Error('Please sign in as an administrator.')
+  return next({ context: { user: { email: shared } } })
 })
 
 const month = z.string().regex(/^\d{4}-\d{2}$/, 'Month must be YYYY-MM')
